@@ -641,6 +641,8 @@ require('lazy').setup({
             },
           },
         },
+
+        cssls = {},
       }
 
       -- Ensure the servers and tools above are installed
@@ -917,17 +919,17 @@ require('lazy').setup({
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
   },
   { -- Oil file browser
-    "stevearc/oil.nvim",
-    dependencies = { "nvim-tree/nvim-web-devicons" },
+    'stevearc/oil.nvim',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
     config = function()
-      require("oil").setup {
-        columns = { "icon" }, 
+      require('oil').setup {
+        columns = { 'icon' },
         keymaps = {
-          ["<C-h>"] = false,
-          ["<C-l>"] = false,
-          ["<C-k>"] = false,
-          ["<C-j>"] = false,
-          ["<M-h>"] = "actions.select_split",
+          ['<C-h>'] = false,
+          ['<C-l>'] = false,
+          ['<C-k>'] = false,
+          ['<C-j>'] = false,
+          ['<M-h>'] = 'actions.select_split',
         },
         view_options = {
           show_hidden = true,
@@ -935,12 +937,21 @@ require('lazy').setup({
       }
 
       -- Open parent directory in current window
-      vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory" })
+      vim.keymap.set('n', '-', '<CMD>Oil<CR>', { desc = 'Open parent directory' })
 
       -- Open parent directory in floating window
-      vim.keymap.set("n", "<space>-", require("oil").toggle_float)
+      vim.keymap.set('n', '<space>-', require('oil').toggle_float)
     end,
-  }
+  },
+  {
+    'pmizio/typescript-tools.nvim',
+    requires = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
+    config = function()
+      require('typescript-tools').setup {
+        format_on_save = true,
+      }
+    end,
+  },
 
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
