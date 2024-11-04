@@ -916,6 +916,31 @@ require('lazy').setup({
     --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
   },
+  { -- Oil file browser
+    "stevearc/oil.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function()
+      require("oil").setup {
+        columns = { "icon" }, 
+        keymaps = {
+          ["<C-h>"] = false,
+          ["<C-l>"] = false,
+          ["<C-k>"] = false,
+          ["<C-j>"] = false,
+          ["<M-h>"] = "actions.select_split",
+        },
+        view_options = {
+          show_hidden = true,
+        },
+      }
+
+      -- Open parent directory in current window
+      vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory" })
+
+      -- Open parent directory in floating window
+      vim.keymap.set("n", "<space>-", require("oil").toggle_float)
+    end,
+  }
 
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
