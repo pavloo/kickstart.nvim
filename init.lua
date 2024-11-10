@@ -204,6 +204,17 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+-- [[ Basic user commands ]]
+
+local copy_file_path = function()
+  local path = vim.fn.expand '%:p'
+  vim.fn.setreg('+', path)
+  vim.notify(path)
+end
+
+vim.api.nvim_create_user_command('CopyFilePath', copy_file_path, { desc = 'Copy absolute path of the current file to clipboard.' })
+vim.keymap.set('n', '<leader>cf', copy_file_path, { desc = "Copy [C]ode [F]ile's absolute path to clipboard" })
+
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
@@ -388,6 +399,9 @@ require('lazy').setup({
         --   },
         -- },
         -- pickers = {}
+        defaults = {
+          path_display = { 'truncate' },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
@@ -893,6 +907,7 @@ require('lazy').setup({
       --  Check out: https://github.com/echasnovski/mini.nvim
     end,
   },
+
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
@@ -918,6 +933,7 @@ require('lazy').setup({
     --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
   },
+
   { -- Oil file browser
     'stevearc/oil.nvim',
     dependencies = { 'nvim-tree/nvim-web-devicons' },
@@ -943,6 +959,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<space>-', require('oil').toggle_float)
     end,
   },
+
   {
     'pmizio/typescript-tools.nvim',
     requires = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
@@ -950,6 +967,76 @@ require('lazy').setup({
       require('typescript-tools').setup {
         format_on_save = true,
       }
+    end,
+  },
+
+  {
+    'iamcco/markdown-preview.nvim',
+    cmd = { 'MarkdownPreviewToggle', 'MarkdownPreview', 'MarkdownPreviewStop' },
+    build = 'cd app && yarn install',
+    init = function()
+      vim.g.mkdp_filetypes = { 'markdown' }
+    end,
+    ft = { 'markdown' },
+  },
+
+  {
+    'windwp/nvim-autopairs',
+    event = 'InsertEnter',
+    config = true,
+    -- use opts = {} for passing setup options
+    -- this is equivalent to setup({}) function
+  },
+  {
+    'f-person/git-blame.nvim',
+    -- load the plugin at startup
+    event = 'VeryLazy',
+    -- Because of the keys part, you will be lazy loading this plugin.
+    -- The plugin wil only load once one of the keys is used.
+    -- If you want to load the plugin at startup, add something like event = "VeryLazy",
+    -- or lazy = false. One of both options will work.
+    config = function()
+      require('gitblame').setup {
+        -- your configuration comes here
+        -- for example
+        use_blame_commit_file_urls = true,
+        enabled = true, -- if you want to enable the plugin
+        message_template = ' <summary> • <date> • <author> • <<sha>>', -- template for the blame message, check the Message template section for more options
+        date_format = '%m-%d-%Y %H:%M:%S', -- template for the date, check Date format section for more options
+        virtual_text_column = 1, -- virtual text start column, check Start virtual text at column section for more options
+      }
+
+      local gitblame = require 'gitblame'
+      local git = require 'gitblame.git'
+
+      local amzn_code_url = function()
+        gitblame.get_sha(function(sha)
+          local filepath = vim.api.nvim_buf_get_name(0)
+          git.get_file_url(filepath, sha, vim.fn.winline(), nil, function(giturl)
+            local amzn_git_ssh = 'ssh://git.amazon.com:2222/pkg'
+            if string.match(giturl, amzn_git_ssh) then
+              giturl = string.gsub(giturl, amzn_git_ssh, 'https://code.amazon.com/packages')
+              giturl = string.gsub(giturl, 'blob/(.-)/(.+)', 'blobs/%1/--/%2')
+            end
+
+            vim.print(giturl)
+            vim.fn.setreg('+', giturl)
+          end)
+        end)
+      end
+
+      local desc = 'Creates [C]ode.amazon.com git [L]ink to the file.'
+      vim.api.nvim_create_user_command('GitBlameCopyAmznCodeUrl', amzn_code_url, { desc = desc })
+      vim.keymap.set('n', '<leader>cl', amzn_code_url, { desc = desc })
+    end,
+  },
+  {
+    'sindrets/diffview.nvim',
+    event = 'VeryLazy',
+    config = function()
+      vim.keymap.set('n', '<leader>cd', function()
+        vim.api.nvim_exec2('DiffviewOpen', {})
+      end, { desc = '[C]ode [D]iffing tool diffvim.nvim.' })
     end,
   },
 
