@@ -965,7 +965,7 @@ require('lazy').setup({
     requires = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
     config = function()
       require('typescript-tools').setup {
-        format_on_save = true,
+        -- format_on_save = true,
       }
     end,
   },
@@ -1012,7 +1012,8 @@ require('lazy').setup({
       local amzn_code_url = function()
         gitblame.get_sha(function(sha)
           local filepath = vim.api.nvim_buf_get_name(0)
-          git.get_file_url(filepath, sha, vim.fn.winline(), nil, function(giturl)
+          vim.print(vim.fn.getcurpos())
+          git.get_file_url(filepath, sha, vim.fn.getcurpos()[2], nil, function(giturl)
             local amzn_git_ssh = 'ssh://git.amazon.com:2222/pkg'
             if string.match(giturl, amzn_git_ssh) then
               giturl = string.gsub(giturl, amzn_git_ssh, 'https://code.amazon.com/packages')
